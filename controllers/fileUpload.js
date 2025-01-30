@@ -24,10 +24,11 @@ exports.localFileUpload = async (req, res) => {
   }
 };
 
-async function uploadFileToCloudinary(file, folder, quality) {
+async function uploadFileToCloudinary(file, folder, width) {
   const options = { folder, resource_type: "auto" };
-  if (quality) {
-    options.quality = quality;
+  if (width) {
+    options.width = width;
+    options.crop = "fill";
   }
 
   return await cloudinary.uploader.upload(file.tempFilePath, options);
@@ -45,6 +46,14 @@ exports.imageUpload = async (req, res) => {
     const fileType = file.name.split(".")[1].toLowerCase();
 
     console.log(fileType);
+
+    // max size 4 mb
+    if (file.size > 4194304) {
+      return res.status(400).json({
+        success: false,
+        message: "File Size too large",
+      });
+    }
 
     if (!supportedTypes.includes(fileType)) {
       return res.status(400).json({
@@ -88,7 +97,13 @@ exports.videoUpload = async (req, res) => {
     const supportedTypes = ["mp4", "mov"];
     const fileType = file.name.split(".")[1].toLowerCase();
 
-    // add a upper limit of 5 mb of video
+    // max size 4 mb
+    if (file.size > 4194304) {
+      return res.status(400).json({
+        success: false,
+        message: "File Size too large",
+      });
+    }
 
     if (!supportedTypes.includes(fileType)) {
       return res.status(400).json({
@@ -130,7 +145,14 @@ exports.imageReducerUpload = async (req, res) => {
     const supportedTypes = ["jpg", "jpeg", "png"];
     const fileType = file.name.split(".")[1].toLowerCase();
 
-    // add an upper limit of 5mb
+    // max size 4 mb
+    if (file.size > 4194304) {
+      return res.status(400).json({
+        success: false,
+        message: "File Size too large",
+      });
+    }
+
     if (!supportedTypes.includes(fileType)) {
       return res.status(400).json({
         success: false,
@@ -139,7 +161,7 @@ exports.imageReducerUpload = async (req, res) => {
     }
 
     // use Height attribute
-    const response = await uploadFileToCloudinary(file, "Garv-Bahal", 30);
+    const response = await uploadFileToCloudinary(file, "Garv-Bahal", 50);
 
     console.log(response);
 
